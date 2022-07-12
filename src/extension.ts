@@ -1,32 +1,9 @@
 import * as vscode from 'vscode';
 import { execSync } from 'child_process';
 
-let pushItem : vscode.StatusBarItem;
+let pushItem: vscode.StatusBarItem;
 let pullItem: vscode.StatusBarItem;
 
-function getGitCommitsCount(pull = true) {
-    if (!vscode.workspace.workspaceFolders) return;
-  
-    try {      
-      let command;
-      if (pull) {
-        command = `git rev-list --count HEAD..@{u}`;
-      }
-      else {
-        command = `git rev-list --count @{u}..HEAD`;
-      }
-      return execSync(command, {
-        cwd: vscode.workspace.workspaceFolders[0].uri.path,
-      })
-        .toString()
-        .trim();
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-
-  
 export function activate({ subscriptions }: vscode.ExtensionContext) {
 
     // Create status bar items
@@ -38,31 +15,56 @@ export function activate({ subscriptions }: vscode.ExtensionContext) {
     pushItem.command = "git.push";
     pushItem.tooltip = "Push changes";
 
+    // Add buttons to start bar
     subscriptions.push(pullItem);
     subscriptions.push(pushItem);
 
+    // Update buttons every X seconds
     const o = (): vscode.Disposable => {
-      const id = setInterval(() => {
-        updateStatusBarItem();
-      }, 5000);
-      return {
-        dispose() {
-          clearInterval(id);
-        },
-      };
+        const id = setInterval(() => {
+            updateStatusBarItem();
+        }, 5000);
+        return {
+            dispose() {
+                clearInterval(id);
+            },
+        };
     };
-    
     subscriptions.push(o());
+    
+    // Update on load
     updateStatusBarItem();
 }
 
 function updateStatusBarItem(): void {
-  const countPull = getGitCommitsCount(true) || "0";
-  const countPush = getGitCommitsCount(false) || "0";
+    const countPull = getGitCommitsCount(true);
+    const countPush = getGitCommitsCount(false);
 
-  pullItem.text = `${countPull} $(arrow-down)`;
-  pushItem.text = `${countPush} $(arrow-up)`;
+    // Hide buttons if no workspace folder opened or on error
+    if (countPull === undefined || countPush === undefined) {
+        pullItem.hide();
+        pushItem.hide();
+    }
+    // Update buttons
+    else {
+        pullItem.text = `${countPull}\u2009$(arrow-down)`;
+        pushItem.text = `${countPush}\u2009$(arrow-up)`;
+    
+        pullItem.show();
+        pushItem.show();
+    }
+}
 
-  pullItem.show();
-  pushItem.show(); 
+function getGitCommitsCount(pull = true) {
+    if (!vscode.workspace.workspaceFolders) return;
+
+    try {
+        // Count commits not yet pulled from or pushed to the remote repository
+        const command = pull ? `git rev-list --count HEAD..@{u}` : `git rev-list --count @{u}..HEAD`;
+        return execSync(command, {
+            cwd: vscode.workspace.workspaceFolders[0].uri.path,
+        }).toString().trim();
+    } catch (error) {
+        console.log(error);
+    }
 }
