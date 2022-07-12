@@ -6,4 +6,4 @@ It also displays the number of commits that haven't yet been pulled from or push
 
 ![Status Bar with Push and Pull Buttons](status-bar.png)
 
-Tip: If you want to use this extension as a replacement for the Sync button, set `git.enableStatusBarSync` to `false`.
+> Tip: If you want to use this extension as a replacement for the Sync button, set `git.enableStatusBarSync` to `false`.
