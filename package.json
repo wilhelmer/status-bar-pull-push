@@ -2,7 +2,7 @@
   "name": "status-bar-pull-push",
   "displayName": "Status Bar Push and Pull",
   "description": "Adds push and pull buttons to the status bar.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "publisher": "wilhelmer",
   "repository": "https://github.com/wilhelmer/status-bar-pull-push.git",
   "icon": "icon.png",
