@@ -61,8 +61,9 @@ function getGitCommitsCount(pull = true) {
     try {
         // Count commits not yet pulled from or pushed to the remote repository
         const command = pull ? `git rev-list --count HEAD..@{u}` : `git rev-list --count @{u}..HEAD`;
+        const workspaceDir = vscode.workspace.workspaceFolders[0].uri.path.substring(1);
         return execSync(command, {
-            cwd: vscode.workspace.workspaceFolders[0].uri.path,
+            cwd: workspaceDir,
         }).toString().trim();
     } catch (error) {
         console.log(error);
